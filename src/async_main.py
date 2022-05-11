@@ -15,7 +15,11 @@ logger.addHandler(logging_handler)
 logger.setLevel(logging.INFO)
 
 
-def borrar_ultima_linea(n=1):
+# todo reorder functions
+# todo document functions
+# todo add readme
+
+def delete_last_line(n=1):
     cursor_up_one = '\x1b[1A'
     erase_line = '\x1b[2K'
     for _ in range(n):
@@ -45,8 +49,8 @@ class Clock:
     lastline = ""
     count = 0
     printed_before = False
-    timer_chars = ['█', "*", "#", "☼", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o",
-                   "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+    bar_chars = ['█', "*", "#", "☼", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o",
+                 "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
     parentdir = os.path.dirname(os.getcwd())
     cleared = False
     reseted = False
@@ -58,7 +62,7 @@ class Clock:
         asyncio.run(self.lobby())
 
     async def lobby(self):
-        self.prprint("entered lobby", "debug")
+        self.prprint("Entered lobby", "debug")
         await self.room0()
         self.print_instructions()
         while True:
@@ -68,11 +72,11 @@ class Clock:
                 timers = get_valid_timers(result[1:])
                 if timers:
                     self.timers = timers
-                borrar_ultima_linea(7)
+                delete_last_line(7)
                 if self.cleared:
-                    borrar_ultima_linea()
+                    delete_last_line()
                 if self.reseted:
-                    borrar_ultima_linea()
+                    delete_last_line()
                 timers_part = f"{'new timers ' if timers else ''}{self.timers}"
                 join_part = f"{' and ' if self.reseted else ''}"
                 reset_part = f'new counter: {self.count}' if self.reseted else ''
@@ -82,7 +86,7 @@ class Clock:
                 self.reseted = False
                 self.print_instructions()
             elif result[0] == "b":
-                borrar_ultima_linea(7)
+                delete_last_line(7)
                 self.del_if_cleared()
                 self.prprint(f"{full_result}: closing", "info")
                 break
@@ -93,7 +97,6 @@ class Clock:
                         self.del_if_reseted()
                         self.prprint(f"r: setting counter to {result[1]}", "info")
                     except ValueError:
-                        # borrar_ultima_linea()
                         self.del_if_cleared()
                         self.prprint(f"r: invalid input: {result[1]}", "info")
                 elif len(result) == 1:
@@ -104,11 +107,11 @@ class Clock:
                     self.prprint("r: invalid argument count input", "info")
             else:
                 self.del_if_cleared()
-                self.prprint(f"input: {full_result}: invalid input", "info")
+                self.prprint(f"Input: {full_result}: invalid input", "info")
 
     def print_instructions(self):
         self.prprint("-" * 20, "print")
-        self.prprint("back in lobby", "print")
+        self.prprint("Back in lobby", "print")
         self.prprint("n - set new timers separated by spaces", "print")
         self.prprint("r - reset counter or set new counter separated by space", "print")
         self.prprint("b - escape program", "print")
@@ -116,36 +119,35 @@ class Clock:
 
     def del_if_reseted(self):
         if self.reseted:
-            borrar_ultima_linea()
+            delete_last_line()
         else:
             self.reseted = True
-        borrar_ultima_linea()
+        delete_last_line()
         if self.cleared:
-            borrar_ultima_linea()
+            delete_last_line()
             self.cleared = False
 
     def del_if_cleared(self):
         if self.cleared:
-            borrar_ultima_linea()
+            delete_last_line()
         else:
             self.cleared = True
-        borrar_ultima_linea()
+        delete_last_line()
 
     async def room0(self):
-        self.prprint("entered room0", "debug")
+        self.prprint("Entered room0", "debug")
         self.printed_before = False
         task1 = asyncio.ensure_future(self.time_tracker())
         task2 = asyncio.create_task(self.input_tracker())
         escapable = await task2
         if escapable:
             task1.cancel()
-            # borrar_ultima_linea()
             self.prprint(f"b: escaped, [total count: {self.count}]", "info")
 
     def prprint(self, texto, mode="info"):
         if self.lastline:
             # aca deberia borrar la ultima linea, escribir el nuevo texto, y reescribir la ultima linea
-            borrar_ultima_linea()
+            delete_last_line()
             print_level(texto, mode)
             print(self.lastline)
         else:
@@ -153,67 +155,55 @@ class Clock:
             print_level(texto, mode)
 
     async def time_tracker(self):
-        self.prprint("entered time_tracker", "debug")
+        self.prprint("Entered time_tracker", "debug")
         while True:
             for timer_id in range(len(self.timers) - 1):
                 await self.gen_lastline(timer_id)
-            # playsound(parentdir + "/sounds/sound_1.wav")
-            # first_timer = 5
-            # await self.gen_lastline(first_timer)
-            # borrar_ultima_linea()
-            # playsound(parentdir + "/sounds/sound_2.wav")
             self.count += 1
-            # second_timer = 13
             await self.gen_lastline(len(self.timers) - 1)
-            # self.lastline = f"[{genbar(0.2, '*')}] contador: {self.count}, se esperan 5"
-            # # print(self.lastline)
-            # self.refresh_lastline()
-            # await asyncio.sleep(2)
-            # borrar_ultima_linea()
 
     async def gen_lastline(self, timer_id):
         timer = self.timers[timer_id]
         time_count = timer
-        timer_char = self.timer_chars[timer_id]
+        timer_char = self.bar_chars[timer_id]
 
         # To play audio in background, use playsound module if not in windows
         winsound.PlaySound(None, winsound.SND_ASYNC)
         winsound.PlaySound(f"{self.parentdir}/sounds/sound_{timer_id % 2 + 1}.wav",
+                           # get sound count from folder
                            winsound.SND_ASYNC | winsound.SND_ALIAS)
-        # playsound.playsound(f"{self.parentdir}/sounds/sound_{1}.wav", True)
+        # playsound.playsound(f"{self.parentdir}/sounds/sound_{timer_id % 2 + 1}.wav", False)
 
         while time_count > 0:
             self.lastline = f"[{genbar(1 - time_count / timer, timer_char)}]: {timer - time_count}/{timer} || Phase: {timer_id + 1}/{len(self.timers)} || Epoc: {self.count}"
-            # borrar_ultima_linea()
             self.refresh_lastline()
             await asyncio.sleep(1)
             time_count -= 1
 
     def refresh_lastline(self):
         if self.printed_before:
-            borrar_ultima_linea()
+            delete_last_line()
         self.printed_before = True
         print(self.lastline)
 
     async def input_tracker(self):
-        self.prprint("entered input_tracker", "debug")
+        self.prprint("Entered input_tracker", "debug")
         ya_logeado = False
         while True:
             result = await aioconsole.ainput()
             if result == "b":
-                # break execution
-                borrar_ultima_linea(2)
+                delete_last_line(2)
                 if ya_logeado:
-                    borrar_ultima_linea()
+                    delete_last_line()
                 self.lastline = ""
                 return True
             else:
-                borrar_ultima_linea()
+                delete_last_line()
                 if not ya_logeado:
                     ya_logeado = True
                 else:
-                    borrar_ultima_linea()
-                self.prprint(f"input: {result}", "info")
+                    delete_last_line()
+                self.prprint(f"Input: {result}", "info")
 
 
 def get_valid_timers(args):
@@ -254,5 +244,4 @@ if __name__ == '__main__':
     timers = get_valid_timers(newargs)
     if not timers:
         timers = [13, 5]
-    # print(sys.argv)
     Clock(timers)
