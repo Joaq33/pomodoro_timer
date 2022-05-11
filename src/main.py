@@ -1,0 +1,1 @@
+from playsound import playsoundimport osimport timeparentdir = os.path.dirname(os.getcwd())count = 0while True:    playsound(parentdir + "/sounds/sound_1.wav")    print("se esperan 13")    time.sleep(13)    playsound(parentdir + "/sounds/sound_2.wav")    count += 1    print("se esperan 5, contador: ", count)    time.sleep(5)
