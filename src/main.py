@@ -2,7 +2,8 @@ import asyncio
 import logging
 import os
 import sys
-import winsound
+#import winsound
+import playsound
 
 import aioconsole
 
@@ -61,7 +62,7 @@ class Clock:
                 self.reseted = False
                 self.print_instructions()
             elif result[0] == "b":
-                delete_last_line(7)
+                delete_last_line(6)
                 self.del_if_cleared()
                 self.prprint(f"{full_result}: closing", "info")
                 break
@@ -175,11 +176,11 @@ class Clock:
 
         # To play audio in background, use playsound module if not in windows
         if self.sound:
-            winsound.PlaySound(None, winsound.SND_ASYNC)
-            winsound.PlaySound(f"{self.parentdir}/sounds/sound_{timer_id % 2 + 1}.wav",
+            #winsound.PlaySound(None, winsound.SND_ASYNC)
+            #winsound.PlaySound(f"{self.parentdir}/sounds/sound_{timer_id % 2 + 1}.wav",
                                # get sound count from folder
-                               winsound.SND_ASYNC | winsound.SND_ALIAS)
-            # playsound.playsound(f"{self.parentdir}/sounds/sound_{timer_id % 2 + 1}.wav", False)
+            #                   winsound.SND_ASYNC | winsound.SND_ALIAS)
+            playsound.playsound(f"{self.parentdir}/sounds/sound_{timer_id % 2 + 1}.wav", False)
 
         while time_count > 0:
             self.lastline = f"[{genbar(1 - time_count / timer, timer_char)}]: {timer - time_count}/{timer} || Phase: {timer_id + 1}/{len(self.timers)} || Epoc: {self.count}"
