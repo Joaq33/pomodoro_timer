@@ -22,7 +22,7 @@ class Clock:
     printed_before = False
     bar_chars = ['█', "*", "#", "☼", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o",
                  "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-    parentdir = os.path.dirname(os.getcwd())
+    parentdir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     cleared = False
     reseted = False
 
